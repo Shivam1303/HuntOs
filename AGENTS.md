@@ -60,7 +60,7 @@ tests/
 
 - Business modules may depend on `core`.
 - `core` must never depend on business modules.
-- Use SQLite for the MVP, FastAPI for the backend, and Streamlit for the review frontend.
+- Use PostgreSQL for the MVP, FastAPI for the backend, and Streamlit for the review frontend.
 - Start with Gemini behind a replaceable LLM-provider interface.
 
 ### LLM responsibilities

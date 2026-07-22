@@ -6,7 +6,7 @@ The MVP is limited to finding, assessing, researching, and drafting proposals fo
 
 - Backend: FastAPI
 - Review frontend: Streamlit
-- Persistence: SQLite
+- Persistence: PostgreSQL
 - Initial LLM provider: Gemini, behind a replaceable interface
 
 No component may submit proposals or send email automatically.
@@ -16,7 +16,7 @@ No component may submit proposals or send email automatically.
 ```text
 core/
   config/       # Settings and configuration boundaries
-  database/     # SQLite connection and persistence primitives
+  database/     # PostgreSQL connection and persistence primitives
   llm/          # Provider-neutral LLM contracts and Gemini adapter
 modules/
   opportunities/ # Opportunity-specific use cases and models

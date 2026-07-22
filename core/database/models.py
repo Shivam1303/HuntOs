@@ -1,14 +1,24 @@
 """SQLAlchemy ORM records owned by the core database layer."""
 
 from datetime import UTC, datetime
+from decimal import Decimal
 from uuid import uuid4
 
-from sqlalchemy import JSON, Boolean, DateTime, Float, ForeignKey, Integer, String, Text
+from sqlalchemy import (
+    JSON,
+    Boolean,
+    DateTime,
+    ForeignKey,
+    Integer,
+    Numeric,
+    String,
+    Text,
+)
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 
 def new_identifier() -> str:
-    """Create a portable string primary key for SQLite records."""
+    """Create a portable string primary key for PostgreSQL records."""
 
     return str(uuid4())
 
@@ -36,8 +46,10 @@ class DeveloperProfileRecord(Base):
     skills: Mapped[list[str]] = mapped_column(JSON, nullable=False)
     preferred_project_types: Mapped[list[str]] = mapped_column(JSON, nullable=False)
     preferred_industries: Mapped[list[str]] = mapped_column(JSON, nullable=False)
-    minimum_budget: Mapped[float | None] = mapped_column(Float, nullable=True)
-    hourly_rate: Mapped[float | None] = mapped_column(Float, nullable=True)
+    minimum_budget: Mapped[Decimal | None] = mapped_column(
+        Numeric(12, 2), nullable=True
+    )
+    hourly_rate: Mapped[Decimal | None] = mapped_column(Numeric(12, 2), nullable=True)
     portfolio_items: Mapped[list[str]] = mapped_column(JSON, nullable=False)
     prohibited_claims: Mapped[list[str]] = mapped_column(JSON, nullable=False)
     created_at: Mapped[datetime] = mapped_column(
@@ -57,8 +69,8 @@ class RawOpportunityRecord(Base):
     platform: Mapped[str] = mapped_column(String(255), nullable=False)
     title: Mapped[str] = mapped_column(String(500), nullable=False)
     description: Mapped[str] = mapped_column(Text, nullable=False)
-    budget_min: Mapped[float | None] = mapped_column(Float, nullable=True)
-    budget_max: Mapped[float | None] = mapped_column(Float, nullable=True)
+    budget_min: Mapped[Decimal | None] = mapped_column(Numeric(12, 2), nullable=True)
+    budget_max: Mapped[Decimal | None] = mapped_column(Numeric(12, 2), nullable=True)
     client_name: Mapped[str | None] = mapped_column(String(255), nullable=True)
     client_history: Mapped[str | None] = mapped_column(Text, nullable=True)
     proposal_count: Mapped[int | None] = mapped_column(Integer, nullable=True)

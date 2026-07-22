@@ -24,7 +24,7 @@ The Lead Hunting MVP is designed to support:
 - Gemini-based analysis
 - Proposal draft generation
 - Streamlit review dashboard
-- SQLite persistence
+- PostgreSQL persistence
 - Manual review of proposal drafts
 
 The first version does **not** support:
@@ -42,7 +42,7 @@ The first version does **not** support:
 - Python 3.12+
 - FastAPI
 - Streamlit
-- SQLite
+- PostgreSQL
 - SQLAlchemy
 - Pydantic
 - Google Gemini API
@@ -94,4 +94,4 @@ Human approval controls outbound actions.
 - `core` must never depend on business modules.
 - `api` and `frontend` compose the application; they do not contain scoring or LLM business rules.
 
-Gemini is the first LLM provider behind a replaceable provider interface. SQLite is the MVP datastore, FastAPI provides the backend, and Streamlit provides the minimal review frontend.
+Gemini is the first LLM provider behind a replaceable provider interface. PostgreSQL is the MVP datastore, FastAPI provides the backend, and Streamlit provides the minimal review frontend.

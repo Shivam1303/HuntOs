@@ -8,10 +8,10 @@ Complete tasks in order. Do not skip ahead unless a dependency requires it.
 - [x] Add `pyproject.toml`
 - [x] Add Ruff, MyPy, and Pytest configuration
 - [x] Add `.env.example`
-- [ ] Add `.gitignore`
-- [ ] Add package-level implementation as each setup and feature task requires it
-- [ ] Add health-check endpoint
-- [ ] Add basic CI workflow
+- [x] Add `.gitignore`
+- [x] Add package-level implementation as each setup and feature task requires it
+- [x] Add health-check endpoint
+- [x] Add basic CI workflow
 
 ## Phase 1 — Data Models and Database
 
@@ -21,7 +21,7 @@ Complete tasks in order. Do not skip ahead unless a dependency requires it.
 - [x] Define `OpportunityScore`
 - [x] Define `ProposalDraft`
 - [x] Define `ApplicationOutcome`
-- [x] Configure SQLite
+- [x] Configure PostgreSQL
 - [x] Create database models
 - [x] Add database migrations or initialization
 - [x] Add repository layer

@@ -85,5 +85,6 @@ class ProjectStructureTests(unittest.TestCase):
 
         self.assertEqual(environment_values["GEMINI_API_KEY"], "")
         self.assertEqual(
-            environment_values["DATABASE_URL"], "sqlite:///./lead_hunting.db"
+            environment_values["DATABASE_URL"],
+            "postgresql+psycopg://hunter:hunter@localhost:5432/hunter",
         )
