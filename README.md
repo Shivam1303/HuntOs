@@ -1,10 +1,10 @@
-# Freelance Opportunity Hunter Agent
+# Lead Hunting MVP
 
-A Codex-ready starter specification for building an AI-powered business development assistant for freelancers.
+An AI-assisted, human-reviewed lead-hunting tool for freelancers and small technical agencies.
 
 ## Product Goal
 
-The agent should help a developer:
+The MVP helps a developer:
 
 1. Import freelance opportunities
 2. Analyze and structure each opportunity
@@ -12,11 +12,11 @@ The agent should help a developer:
 4. Research the client when allowed
 5. Generate a personalized proposal draft
 6. Require human approval before any outbound action
-7. Track outcomes and improve recommendations
+7. Record review decisions manually
 
 ## MVP Scope
 
-The first version supports:
+The Lead Hunting MVP is designed to support:
 
 - CSV opportunity import
 - Structured opportunity parsing
@@ -25,7 +25,7 @@ The first version supports:
 - Proposal draft generation
 - Streamlit review dashboard
 - SQLite persistence
-- Manual application tracking
+- Manual review of proposal drafts
 
 The first version does **not** support:
 
@@ -35,6 +35,7 @@ The first version does **not** support:
 - Autonomous email sending
 - Paid enrichment services
 - Vector databases
+- CRM, outreach, analytics, learning, scheduler, or multi-agent modules
 
 ## Recommended Stack
 
@@ -52,20 +53,18 @@ The first version does **not** support:
 ## Repository Structure
 
 ```text
-app/
-  api/
+core/
+  config/
   database/
   llm/
-  models/
-  parser/
-  proposal/
-  research/
+modules/
+  opportunities/
   scoring/
-  services/
-  prompts/
+  research/
+  proposals/
+api/
 frontend/
 tests/
-data/
 docs/
 prompts/
 AGENTS.md
@@ -88,3 +87,11 @@ The LLM interprets text.
 Python code makes measurable business decisions.
 
 Human approval controls outbound actions.
+
+## Dependency Direction
+
+- Business modules may depend on `core`.
+- `core` must never depend on business modules.
+- `api` and `frontend` compose the application; they do not contain scoring or LLM business rules.
+
+Gemini is the first LLM provider behind a replaceable provider interface. SQLite is the MVP datastore, FastAPI provides the backend, and Streamlit provides the minimal review frontend.

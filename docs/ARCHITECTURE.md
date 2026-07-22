@@ -1,4 +1,34 @@
-# Architecture
+# Lead Hunting MVP Architecture
+
+## Scope and Technology
+
+The MVP is limited to finding, assessing, researching, and drafting proposals for freelance opportunities. It does not include CRM, outreach, analytics, learning, scheduler, or multi-agent capabilities.
+
+- Backend: FastAPI
+- Review frontend: Streamlit
+- Persistence: SQLite
+- Initial LLM provider: Gemini, behind a replaceable interface
+
+No component may submit proposals or send email automatically.
+
+## Project Layout
+
+```text
+core/
+  config/       # Settings and configuration boundaries
+  database/     # SQLite connection and persistence primitives
+  llm/          # Provider-neutral LLM contracts and Gemini adapter
+modules/
+  opportunities/ # Opportunity-specific use cases and models
+  scoring/      # Deterministic scoring rules
+  research/     # Permitted client research use cases
+  proposals/    # Evidence-constrained proposal drafting
+api/            # FastAPI transport layer and dependency composition
+frontend/       # Streamlit human-review interface
+tests/          # Unit and integration tests
+```
+
+Business modules may depend on `core`. `core` must never depend on a business module. The `api` and `frontend` layers compose dependencies and delegate work to modules; they must not become alternate homes for business logic.
 
 ## High-Level Flow
 
@@ -19,7 +49,7 @@ Proposal Draft Generator
    ↓
 Human Review Dashboard
    ↓
-Manual Application Tracking
+Manual Follow-up Outside the System
 ```
 
 ## Main Components
@@ -43,7 +73,6 @@ Store:
 - Parsed opportunities
 - Scores
 - Proposal drafts
-- Application outcomes
 - Processing errors
 
 ### LLM Layer
@@ -87,6 +116,8 @@ No LLM calls.
 
 Every score must include an explanation.
 
+Only deterministic Python calculates scores and penalties. The LLM may parse, summarize, research, and draft, but it must not make scoring decisions.
+
 ### Proposal Layer
 
 Uses:
@@ -108,7 +139,8 @@ Views:
 - Opportunity list
 - Opportunity detail
 - Proposal review
-- Outcomes
+
+The first frontend is a minimal Streamlit review interface. It presents information and records explicit human decisions; it never sends an outbound action.
 
 ## State Model
 
@@ -124,9 +156,6 @@ DRAFTING
 READY_FOR_REVIEW
 APPROVED
 REJECTED
-APPLIED
-WON
-LOST
 ERROR
 ```
 

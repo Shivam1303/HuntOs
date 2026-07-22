@@ -4,12 +4,12 @@ Complete tasks in order. Do not skip ahead unless a dependency requires it.
 
 ## Phase 0 — Project Setup
 
-- [ ] Initialize Python project
+- [x] Initialize Python project (create the empty importable MVP skeleton)
 - [ ] Add `pyproject.toml`
 - [ ] Add Ruff, MyPy, and Pytest configuration
 - [ ] Add `.env.example`
 - [ ] Add `.gitignore`
-- [ ] Create application package structure
+- [ ] Add package-level implementation as each setup and feature task requires it
 - [ ] Add health-check endpoint
 - [ ] Add basic CI workflow
 

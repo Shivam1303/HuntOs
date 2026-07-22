@@ -8,6 +8,8 @@ Act as a senior Python engineer implementing one small, testable task at a time.
 
 Do not redesign the entire system unless explicitly requested.
 
+Focus exclusively on the Lead Hunting MVP. Do not create CRM, outreach, analytics, learning, scheduler, or multi-agent modules.
+
 ## Working Method
 
 For each task:
@@ -39,6 +41,28 @@ For each task:
 
 ## Architecture Boundaries
 
+Use this top-level layout:
+
+```text
+core/
+  config/
+  database/
+  llm/
+modules/
+  opportunities/
+  scoring/
+  research/
+  proposals/
+api/
+frontend/
+tests/
+```
+
+- Business modules may depend on `core`.
+- `core` must never depend on business modules.
+- Use SQLite for the MVP, FastAPI for the backend, and Streamlit for the review frontend.
+- Start with Gemini behind a replaceable LLM-provider interface.
+
 ### LLM responsibilities
 
 The LLM may:
@@ -61,6 +85,8 @@ Python must:
 - Prevent duplicate processing
 - Store workflow state
 - Decide whether an outbound action is permitted
+
+The LLM may only parse, summarize, research, and draft. Deterministic Python code must calculate all scores.
 
 ## Safety Rules
 
