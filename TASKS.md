@@ -5,9 +5,9 @@ Complete tasks in order. Do not skip ahead unless a dependency requires it.
 ## Phase 0 — Project Setup
 
 - [x] Initialize Python project (create the empty importable MVP skeleton)
-- [ ] Add `pyproject.toml`
-- [ ] Add Ruff, MyPy, and Pytest configuration
-- [ ] Add `.env.example`
+- [x] Add `pyproject.toml`
+- [x] Add Ruff, MyPy, and Pytest configuration
+- [x] Add `.env.example`
 - [ ] Add `.gitignore`
 - [ ] Add package-level implementation as each setup and feature task requires it
 - [ ] Add health-check endpoint
@@ -15,17 +15,17 @@ Complete tasks in order. Do not skip ahead unless a dependency requires it.
 
 ## Phase 1 — Data Models and Database
 
-- [ ] Define `DeveloperProfile`
-- [ ] Define `RawOpportunity`
-- [ ] Define `ParsedOpportunity`
-- [ ] Define `OpportunityScore`
-- [ ] Define `ProposalDraft`
-- [ ] Define `ApplicationOutcome`
-- [ ] Configure SQLite
-- [ ] Create database models
-- [ ] Add database migrations or initialization
-- [ ] Add repository layer
-- [ ] Add duplicate-detection logic
+- [x] Define `DeveloperProfile`
+- [x] Define `RawOpportunity`
+- [x] Define `ParsedOpportunity`
+- [x] Define `OpportunityScore`
+- [x] Define `ProposalDraft`
+- [x] Define `ApplicationOutcome`
+- [x] Configure SQLite
+- [x] Create database models
+- [x] Add database migrations or initialization
+- [x] Add repository layer
+- [x] Add duplicate-detection logic
 
 ## Phase 2 — CSV Import
 

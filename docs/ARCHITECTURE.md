@@ -49,7 +49,7 @@ Proposal Draft Generator
    ↓
 Human Review Dashboard
    ↓
-Manual Follow-up Outside the System
+Manual Application Outcome Recording
 ```
 
 ## Main Components
@@ -73,6 +73,7 @@ Store:
 - Parsed opportunities
 - Scores
 - Proposal drafts
+- Manual application outcomes (this is not a CRM)
 - Processing errors
 
 ### LLM Layer
@@ -139,6 +140,7 @@ Views:
 - Opportunity list
 - Opportunity detail
 - Proposal review
+- Manual outcome record
 
 The first frontend is a minimal Streamlit review interface. It presents information and records explicit human decisions; it never sends an outbound action.
 
@@ -156,6 +158,9 @@ DRAFTING
 READY_FOR_REVIEW
 APPROVED
 REJECTED
+APPLIED
+WON
+LOST
 ERROR
 ```
 
