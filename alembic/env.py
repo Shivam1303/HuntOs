@@ -1,16 +1,29 @@
 """Alembic environment configured from the application database URL."""
 
-from logging.config import fileConfig
-
 from sqlalchemy import engine_from_config, pool
 
 from alembic import context
 from core.config.settings import get_database_url
 from core.database.models import Base
+from modules.opportunities.models import (
+    ApplicationOutcomeRecord,
+    DeveloperProfileRecord,
+    ParsedOpportunityRecord,
+    RawOpportunityRecord,
+)
+from modules.proposals.models import ProposalDraftRecord
+from modules.scoring.models import OpportunityScoreRecord
+
+REGISTERED_MODELS = (
+    ApplicationOutcomeRecord,
+    DeveloperProfileRecord,
+    ParsedOpportunityRecord,
+    ProposalDraftRecord,
+    RawOpportunityRecord,
+    OpportunityScoreRecord,
+)
 
 config = context.config
-if config.config_file_name is not None:
-    fileConfig(config.config_file_name)
 
 database_url = config.attributes.get("database_url") or get_database_url()
 config.set_main_option("sqlalchemy.url", database_url)

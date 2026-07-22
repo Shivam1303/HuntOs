@@ -58,11 +58,11 @@ core/
   database/
   llm/
 modules/
-  opportunities/
-  scoring/
+  opportunities/       # Schemas, models, repository, and use cases
+  scoring/             # Models, repository, and deterministic rules
   research/
-  proposals/
-api/
+  proposals/           # Models, repository, and drafting use cases
+api/                   # Thin FastAPI controllers
 frontend/
 tests/
 docs/
@@ -90,8 +90,10 @@ Human approval controls outbound actions.
 
 ## Dependency Direction
 
-- Business modules may depend on `core`.
-- `core` must never depend on business modules.
-- `api` and `frontend` compose the application; they do not contain scoring or LLM business rules.
+- Business modules own their Pydantic schemas, SQLAlchemy models, repositories, and use cases.
+- `core/database` owns only shared engine, session, migration, and declarative-base primitives.
+- Business modules may depend on `core`; `core` must never depend on business modules.
+- FastAPI controllers live in `api`, compose module repositories, and remain thin transport adapters.
+- `frontend` composes the application and does not contain scoring or LLM business rules.
 
 Gemini is the first LLM provider behind a replaceable provider interface. PostgreSQL is the MVP datastore, FastAPI provides the backend, and Streamlit provides the minimal review frontend.

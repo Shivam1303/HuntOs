@@ -33,6 +33,17 @@ class ProjectStructureTests(unittest.TestCase):
         self.assertTrue((PROJECT_ROOT / "frontend").is_dir())
         self.assertTrue((PROJECT_ROOT / "tests").is_dir())
 
+    def test_database_repositories_are_owned_by_business_modules(self) -> None:
+        self.assertFalse((PROJECT_ROOT / "core/database/repositories.py").exists())
+        self.assertFalse(
+            (PROJECT_ROOT / "core/database/raw_opportunity_repository.py").exists()
+        )
+
+        for module in ("opportunities", "scoring", "proposals"):
+            module_path = PROJECT_ROOT / "modules" / module
+            self.assertTrue((module_path / "models.py").is_file(), module)
+            self.assertTrue((module_path / "repositories.py").is_file(), module)
+
     def test_out_of_scope_module_directories_are_absent(self) -> None:
         forbidden_directories = (
             "crm",

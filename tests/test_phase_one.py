@@ -1,16 +1,11 @@
 """Tests for Phase 1 data models and PostgreSQL migration contracts."""
 
 from datetime import UTC, datetime
-from pathlib import Path
-from tempfile import TemporaryDirectory
-from unittest import TestCase, skipUnless
+from unittest import TestCase
 from uuid import uuid4
 
 from pydantic import ValidationError
 
-from core.database.database import PostgreSQLDatabase
-from core.database.repositories import DuplicateOpportunityError, LeadHuntingRepository
-from modules.opportunities.duplicate_detection import opportunity_fingerprint
 from modules.opportunities.schemas import (
     ApplicationOutcome,
     ApplicationOutcomeStatus,
@@ -139,118 +134,3 @@ class DataModelTests(TestCase):
             posted_at=datetime(2026, 7, 22, tzinfo=UTC),
             url="https://example.com/jobs/123",
         )
-
-
-@skipUnless(False, "PostgreSQL integration tests are being migrated")
-class PostgreSQLRepositoryTests(TestCase):
-    """PostgreSQL integration tests are defined separately during migration."""
-
-    def test_repository_persists_every_phase_one_record_type(self) -> None:
-        with TemporaryDirectory() as temporary_directory:
-            database = PostgreSQLDatabase(Path(temporary_directory) / "lead_hunting.db")
-            database.initialize()
-            raw_opportunity = DataModelTests._raw_opportunity()
-
-            with database.session() as session:
-                repository = LeadHuntingRepository(session)
-                profile = repository.add_developer_profile(
-                    name="Ada Developer",
-                    headline="Python automation specialist",
-                    skills=["Python"],
-                    preferred_project_types=["API integration"],
-                    preferred_industries=["SaaS"],
-                    minimum_budget=500.0,
-                    hourly_rate=75.0,
-                    portfolio_items=["Workflow service"],
-                    prohibited_claims=["Do not claim certifications"],
-                )
-                raw_record = repository.add_raw_opportunity(
-                    fingerprint=opportunity_fingerprint(raw_opportunity),
-                    **raw_opportunity.model_dump(),
-                )
-                parsed = repository.add_parsed_opportunity(
-                    raw_opportunity_id=raw_record.id,
-                    required_skills=["Python"],
-                    business_problem="Automate document intake.",
-                    expected_deliverables=["Workflow"],
-                    experience_level="intermediate",
-                    warning_signs=[],
-                    missing_information=[],
-                    clarification_questions=["Which formats are required?"],
-                )
-                score = repository.add_opportunity_score(
-                    raw_opportunity_id=raw_record.id,
-                    total=78,
-                    skill_match=20,
-                    budget_quality=12,
-                    requirement_clarity=9,
-                    client_quality=13,
-                    portfolio_relevance=14,
-                    repeat_work_potential=6,
-                    competition=8,
-                    penalties=-4,
-                    explanation=["Strong fit."],
-                )
-                draft = repository.add_proposal_draft(
-                    raw_opportunity_id=raw_record.id,
-                    client_problem_summary="Automate document intake.",
-                    proposed_solution="Build a workflow.",
-                    relevant_evidence=["Workflow service"],
-                    questions=["Which formats are required?"],
-                    proposal_text="I can help build this workflow.",
-                    requires_human_approval=True,
-                )
-                outcome = repository.add_application_outcome(
-                    raw_opportunity_id=raw_record.id,
-                    status=ApplicationOutcomeStatus.APPLIED.value,
-                    notes="Recorded manually.",
-                )
-
-                self.assertEqual(profile.name, "Ada Developer")
-                self.assertEqual(parsed.raw_opportunity_id, raw_record.id)
-                self.assertEqual(score.total, 78)
-                self.assertTrue(draft.requires_human_approval)
-                self.assertEqual(outcome.status, ApplicationOutcomeStatus.APPLIED.value)
-
-            with database.session() as session:
-                repository = LeadHuntingRepository(session)
-                stored_record = repository.get_raw_opportunity_by_fingerprint(
-                    opportunity_fingerprint(raw_opportunity)
-                )
-
-            self.assertIsNotNone(stored_record)
-            self.assertEqual(stored_record.title, raw_opportunity.title)
-
-    def test_normalized_fingerprint_prevents_duplicate_raw_opportunities(self) -> None:
-        original = DataModelTests._raw_opportunity()
-        equivalent = original.model_copy(
-            update={
-                "platform": " upwork ",
-                "title": "Build   a document workflow",
-                "description": "Automate document intake and routing. ",
-            }
-        )
-
-        self.assertEqual(
-            opportunity_fingerprint(original), opportunity_fingerprint(equivalent)
-        )
-
-        with TemporaryDirectory() as temporary_directory:
-            database = PostgreSQLDatabase(Path(temporary_directory) / "lead_hunting.db")
-            database.initialize()
-
-            with database.session() as session:
-                repository = LeadHuntingRepository(session)
-                repository.add_raw_opportunity(
-                    fingerprint=opportunity_fingerprint(original),
-                    **original.model_dump(),
-                )
-
-                self.assertTrue(
-                    repository.is_duplicate(opportunity_fingerprint(equivalent))
-                )
-                with self.assertRaises(DuplicateOpportunityError):
-                    repository.add_raw_opportunity(
-                        fingerprint=opportunity_fingerprint(equivalent),
-                        **equivalent.model_dump(),
-                    )

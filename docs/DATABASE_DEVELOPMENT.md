@@ -67,6 +67,8 @@ Create a reviewed migration after changing SQLAlchemy ORM metadata:
 alembic revision --autogenerate -m "describe schema change"
 ```
 
+Business ORM models live in their owning module's `models.py`; `core/database/models.py` contains only the shared declarative base and model helpers. Alembic's `env.py` must import each module model so every table is registered in `Base.metadata` before autogeneration.
+
 Review the generated revision, especially constraints, indexes, `Numeric` precision, and timezone-aware columns, before committing it. Autogeneration is a draft, not an approval step.
 
 Downgrade all schema revisions:

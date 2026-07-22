@@ -19,16 +19,16 @@ core/
   database/     # PostgreSQL connection and persistence primitives
   llm/          # Provider-neutral LLM contracts and Gemini adapter
 modules/
-  opportunities/ # Opportunity-specific use cases and models
-  scoring/      # Deterministic scoring rules
+  opportunities/ # Schemas, ORM models, repository, and use cases
+  scoring/      # Models, repository, and deterministic scoring rules
   research/     # Permitted client research use cases
-  proposals/    # Evidence-constrained proposal drafting
-api/            # FastAPI transport layer and dependency composition
+  proposals/    # Models, repository, and drafting use cases
+api/            # Thin FastAPI controllers and dependency composition
 frontend/       # Streamlit human-review interface
 tests/          # Unit and integration tests
 ```
 
-Business modules may depend on `core`. `core` must never depend on a business module. The `api` and `frontend` layers compose dependencies and delegate work to modules; they must not become alternate homes for business logic.
+Business modules may depend on `core`. `core` must never depend on a business module. Each business module owns its schemas, SQLAlchemy records, repository port, and PostgreSQL adapter. The `api` and `frontend` layers compose dependencies and delegate work to modules; they must not become alternate homes for business logic.
 
 ## High-Level Flow
 
@@ -65,16 +65,17 @@ Responsibilities:
 - Trigger proposal generation
 - Save review actions
 
-### Database Layer
+### Persistence Layer
 
-Store:
+`core/database` owns only shared PostgreSQL engine, transaction, Alembic, and SQLAlchemy declarative-base primitives. It contains no business repositories.
 
-- Raw opportunities
-- Parsed opportunities
-- Scores
-- Proposal drafts
-- Manual application outcomes (this is not a CRM)
-- Processing errors
+Each business module owns its table mappings and repository:
+
+- `modules/opportunities`: profiles, raw and parsed opportunities, and manual outcomes;
+- `modules/scoring`: deterministic score records;
+- `modules/proposals`: human-reviewed proposal drafts.
+
+Repository protocols support dependency injection into use cases. PostgreSQL adapters accept validated Pydantic schemas and persist module-owned ORM models. Alembic is the composition point that imports every module model before reading `Base.metadata`.
 
 ### LLM Layer
 
