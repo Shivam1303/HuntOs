@@ -1,0 +1,3 @@
+platform,title,description,budget_min,budget_max,client_name,client_history,proposal_count,url
+Example,Build invoice extraction workflow,"Need a Python developer to extract fields from PDF invoices and send validated data to our accounting system.",500,1500,Example Client,"5 previous hires",12,https://example.com/job/1
+Example,Create AI support chatbot,"Need a chatbot for our website. Budget is fixed and includes unlimited revisions.",50,50,Unknown,"No history",50,https://example.com/job/2
