@@ -5,7 +5,14 @@ from enum import Enum
 from typing import Annotated, Self
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field, StringConstraints, model_validator
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    StringConstraints,
+    computed_field,
+    model_validator,
+)
 
 NonEmptyText = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1)]
 
@@ -56,6 +63,60 @@ class RawOpportunity(OpportunitySchema):
         ):
             raise ValueError("budget_max must be greater than or equal to budget_min")
         return self
+
+
+class CSVRowError(OpportunitySchema):
+    """A validation failure tied to one logical CSV data row."""
+
+    row_number: int = Field(ge=2)
+    field: NonEmptyText | None = None
+    message: NonEmptyText
+
+
+class CSVDuplicateRow(OpportunitySchema):
+    """A valid CSV row skipped because its opportunity already exists."""
+
+    row_number: int = Field(ge=2)
+    reason: NonEmptyText
+
+
+class CSVImportResult(OpportunitySchema):
+    """Validated rows and visible failures from one CSV import attempt."""
+
+    total_rows: int = Field(ge=0)
+    opportunities: tuple[RawOpportunity, ...]
+    opportunity_row_numbers: tuple[int, ...] = Field(exclude=True)
+    errors: tuple[CSVRowError, ...]
+    duplicates: tuple[CSVDuplicateRow, ...] = ()
+    stored_opportunity_ids: tuple[NonEmptyText, ...] = ()
+
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def valid_count(self) -> int:
+        """Return the number of rows that produced valid opportunities."""
+
+        return len(self.opportunities)
+
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def rejected_count(self) -> int:
+        """Return the number of rows rejected by validation."""
+
+        return len(self.errors)
+
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def stored_count(self) -> int:
+        """Return the number of valid opportunities persisted successfully."""
+
+        return len(self.stored_opportunity_ids)
+
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def skipped_count(self) -> int:
+        """Return the number of valid rows skipped as duplicates."""
+
+        return len(self.duplicates)
 
 
 class ParsedOpportunity(OpportunitySchema):

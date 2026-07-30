@@ -9,8 +9,8 @@ does not replace them.
 | Phase | Status | Development record |
 | --- | --- | --- |
 | 0 - Project setup | Complete | [00-project-setup.md](00-project-setup.md) |
-| 1 - Data models and database | Complete, with one test-infrastructure follow-up | [01-data-models-and-database.md](01-data-models-and-database.md) |
-| 2 - CSV import | Planned | [02-csv-import-plan.md](02-csv-import-plan.md) |
+| 1 - Data models and database | Complete, with non-import adapter integration follow-up | [01-data-models-and-database.md](01-data-models-and-database.md) |
+| 2 - CSV import | Complete | [02-csv-import-plan.md](02-csv-import-plan.md) |
 
 The authoritative task checklist remains [TASKS.md](../../TASKS.md). Future
 phases should receive a development record when work starts, then be updated

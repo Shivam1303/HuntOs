@@ -3,6 +3,7 @@
 from typing import Protocol, runtime_checkable
 
 from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from modules.opportunities.models import (
@@ -77,8 +78,16 @@ class PostgreSQLOpportunityRepository:
             fingerprint=fingerprint,
             **opportunity.model_dump(),
         )
-        self._session.add(record)
-        self._session.flush()
+        try:
+            with self._session.begin_nested():
+                self._session.add(record)
+                self._session.flush()
+        except IntegrityError as error:
+            if getattr(error.orig, "sqlstate", None) == "23505":
+                raise DuplicateOpportunityError(
+                    "An opportunity with this fingerprint already exists"
+                ) from error
+            raise
         return record
 
     def get_raw_opportunity_by_fingerprint(

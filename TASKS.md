@@ -29,14 +29,14 @@ Complete tasks in order. Do not skip ahead unless a dependency requires it.
 
 ## Phase 2 — CSV Import
 
-- [ ] Define supported CSV columns
-- [ ] Implement CSV validator
-- [ ] Implement CSV importer
-- [ ] Return row-level validation errors
-- [ ] Store valid opportunities
-- [ ] Prevent duplicate imports
-- [ ] Add CSV import tests
-- [ ] Add sample CSV file
+- [x] Define supported CSV columns
+- [x] Implement CSV validator   
+- [x] Implement CSV importer
+- [x] Return row-level validation errors
+- [x] Store valid opportunities
+- [x] Prevent duplicate imports
+- [x] Add CSV import tests
+- [x] Add sample CSV file
 
 ## Phase 3 — LLM Provider
 

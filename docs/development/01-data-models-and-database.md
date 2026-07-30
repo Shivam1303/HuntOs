@@ -1,7 +1,7 @@
 # Phase 1 - Data Models and Database
 
-Status: complete, with PostgreSQL integration-test coverage still to be
-re-enabled.
+Status: complete. Raw-opportunity PostgreSQL integration is verified in Phase 2;
+non-import adapter integration remains future work.
 
 ## Delivered changes
 
@@ -54,16 +54,16 @@ outcomes record manual results only; neither model nor repository performs an
 outbound action. Scores are storage contracts at this point, not scoring
 logic.
 
-## Known follow-up
+## Integration follow-up
 
-Module ownership and repository contracts have unit coverage, but live
-PostgreSQL repository integration coverage is still pending. Phase 2 must not
-claim PostgreSQL import integration is verified until those tests run against
-an isolated `*_test` database.
+Phase 2 now verifies raw-opportunity migrations, persistence, and duplicate
+handling against an isolated `*_test` PostgreSQL database. Live integration
+coverage for the profile, parsed-opportunity, scoring, and proposal adapters
+remains future work in their owning feature phases.
 
-## Handoff to Phase 2
+## Phase 2 result
 
-Phase 2 should validate CSV rows into `RawOpportunity`, calculate the existing
-fingerprint, and persist only valid, non-duplicate records through the
-repository. Its detailed delivery contract is in
+Phase 2 validates CSV rows into `RawOpportunity`, calculates the existing
+fingerprint, and persists only valid, non-duplicate records through the
+repository. Its completed delivery record is in
 [02-csv-import-plan.md](02-csv-import-plan.md).

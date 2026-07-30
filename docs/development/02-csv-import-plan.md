@@ -1,6 +1,7 @@
 # Phase 2 - CSV Import Plan
 
-Status: planned. No CSV importer or validator has been implemented yet.
+Status: complete. CSV validation, persistence, row-level errors, duplicate
+prevention, comprehensive tests, and the canonical sample file are delivered.
 
 ## Goal
 
@@ -31,10 +32,66 @@ header row. Canonical headers are:
 Whitespace-only optional cells become `None`. Required header names are a
 file-level contract: a file without one is rejected before persistence. An
 unknown header is also a file-level error so ignored input cannot be mistaken
-for imported data. Existing `sample_opportunities.csv` is illustrative only;
-Phase 2 must update it to this exact header contract and include both valid
-and intentionally problematic examples in tests rather than relying on the
-sample for failure coverage.
+for imported data. `sample_opportunities.csv` uses this exact header contract and contains valid
+illustrative rows. Intentionally problematic examples remain in tests rather
+than the distributable sample.
+
+The canonical order and its required/optional partitions are defined as
+immutable tuples in `modules/opportunities/csv_columns.py`. The validator and importer consume that contract instead of maintaining their
+own header lists.
+
+## Delivered progress
+
+- Defined all 11 supported CSV columns in canonical order.
+- Marked `platform`, `title`, and `description` as required; the remaining
+  columns are optional.
+- Added unit coverage for exact ordering, partition membership, and ensuring
+  the two partitions are disjoint and exhaustive.
+- Added header validation for missing required, unsupported, and duplicate
+  columns.
+- Added single-row conversion into `RawOpportunity`, including optional blank
+  normalization, finite numeric conversion, whole-number proposal counts,
+  timezone-aware ISO 8601 timestamps, and existing schema invariants.
+- Added field-aware validation exceptions consumed by importer result handling.
+- Added a transport-only importer that decodes UTF-8 bytes with optional BOM,
+  parses standard CSV quoting and multiline fields, validates the header, and
+  returns validated `RawOpportunity` models in file order.
+- Added explicit file-level failures for invalid UTF-8 and malformed CSV
+  syntax.
+- Added `CSVImportResult` and `CSVRowError` Pydantic response schemas. Invalid
+  rows include their logical row number, field when known, and message; later
+  valid rows continue processing. Extra cells are reported as a local row
+  error. The result exposes total, valid, and rejected row counts.
+- Added a `CSVImporter` service with an injected `RawOpportunityRepository`. It
+  stores only validated opportunities, supplies deterministic fingerprints,
+  and returns stored record IDs and a stored count. Persistence failures remain
+  visible so the caller-owned transaction can roll back.
+- Added duplicate reporting with row number and reason for repeated rows within
+  one upload, opportunities already in the repository, and conflicts detected
+  during storage. Duplicate rows are skipped while later valid rows continue.
+- Wrapped PostgreSQL raw-opportunity inserts in a nested transaction and mapped
+  SQLSTATE `23505` unique violations to `DuplicateOpportunityError`. Other
+  integrity failures continue to propagate.
+- Added isolated PostgreSQL integration coverage that applies Alembic, commits
+  every supported field for valid rows, rejects invalid rows, and proves a
+  second import is skipped without another database record.
+- Updated `sample_opportunities.csv` to the exact canonical 11-column order
+  with three valid examples, including optional blank values. A contract test
+  executes the sample through the importer.
+
+Verification for this slice:
+
+```text
+TEST_DATABASE_URL=postgresql+psycopg://hunter:hunter@localhost:5432/hunter_test PYTHONDONTWRITEBYTECODE=1 /tmp/huntos-phase2-uv/bin/python -m pytest -p no:cacheprovider
+/tmp/huntos-phase2-uv/bin/ruff check .
+/tmp/huntos-phase2-uv/bin/mypy
+git diff --check
+```
+
+PostgreSQL import behavior was verified against the isolated `hunter_test`
+database. The integration fixture refuses non-`*_test` URLs and cleans imported
+rows around each test. Unit tests remain the default fast path and PostgreSQL
+tests skip clearly when `TEST_DATABASE_URL` is absent.
 
 ## Behavior and result model
 
@@ -110,13 +167,14 @@ logic.
 - `pytest`, `ruff check .`, and `mypy` pass, including the restored isolated
   PostgreSQL integration coverage.
 
-## Risks to resolve during implementation
+## Resolved and remaining risks
 
-- Phase 1's PostgreSQL repository tests are currently skipped, so the test
-  database fixture and migration lifecycle need to be completed before the
-  importer can prove persistence behavior.
-- CSV parsers can accept malformed dialects differently. Keep the first
-  version deliberately narrow (standard comma-delimited UTF-8 CSV) and return
-  a clear file-level error for parser failures.
-- Do not use the sample file as evidence of successful persistence. Tests need
-  an isolated PostgreSQL database and explicit assertions for stored rows.
+- The raw-opportunity PostgreSQL migration, persistence, and duplicate path is
+  now covered against an isolated test database.
+- CSV parsing is deliberately limited to standard comma-delimited UTF-8 input;
+  malformed syntax and invalid encoding remain visible file-level failures.
+- The sample file proves the public CSV contract, while persistence evidence
+  comes from dedicated integration fixtures rather than sample execution.
+- Verification currently emits upstream deprecation warnings for Starlette
+  `httpx` compatibility and Alembic `path_separator`; neither affects Phase 2
+  behavior.
