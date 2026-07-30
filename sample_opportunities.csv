@@ -1,3 +1,4 @@
-platform,title,description,budget_min,budget_max,client_name,client_history,proposal_count,url
-Example,Build invoice extraction workflow,"Need a Python developer to extract fields from PDF invoices and send validated data to our accounting system.",500,1500,Example Client,"5 previous hires",12,https://example.com/job/1
-Example,Create AI support chatbot,"Need a chatbot for our website. Budget is fixed and includes unlimited revisions.",50,50,Unknown,"No history",50,https://example.com/job/2
+platform,title,description,source_id,budget_min,budget_max,client_name,client_history,proposal_count,posted_at,url
+Example,Build invoice extraction workflow,"Need a Python developer to extract fields from PDF invoices and send validated data to our accounting system.",example-job-1,500,1500,Example Client,"5 previous hires",12,2026-07-23T09:00:00+05:30,https://example.com/job/1
+Example,Create AI support chatbot,"Need a chatbot for our website with reviewed escalation paths and documented API integration.",example-job-2,800,1200,Sample Company,"3 previous hires",8,2026-07-23T10:30:00Z,https://example.com/job/2
+Example,Automate weekly reports,"Create a Python workflow that validates spreadsheet data and produces a weekly summary.",example-job-3,,,Reporting Client,"New client",,2026-07-23T12:00:00+05:30,https://example.com/job/3
