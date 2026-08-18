@@ -79,34 +79,64 @@ Repository protocols support dependency injection into use cases. PostgreSQL ada
 
 ### LLM Layer
 
-Expose a provider-neutral interface.
+`core/llm` exposes a provider-neutral asynchronous interface. Business modules
+import this contract and internal exceptions only; they never import Gemini or
+another provider SDK.
 
 ```python
 from typing import Protocol, TypeVar
+
 from pydantic import BaseModel
 
 T = TypeVar("T", bound=BaseModel)
 
+
 class LLMProvider(Protocol):
-    def generate_structured(
+    async def generate_text(
+        self,
+        *,
+        system_prompt: str,
+        user_prompt: str,
+    ) -> str: ...
+
+    async def generate_structured(
         self,
         *,
         system_prompt: str,
         user_prompt: str,
         response_model: type[T],
-    ) -> T:
-        ...
+    ) -> T: ...
 ```
 
-Initial provider:
+Dependency direction:
 
-- Gemini
+```text
+business modules
+      ↓
+core.llm.LLMProvider
+      ↓
+GeminiLLMProvider → google-genai
+```
 
-Future providers:
+`GeminiLLMProvider` owns one `google.genai.Client` per provider instance and
+uses its asynchronous client. System instructions and generation settings are
+passed through typed SDK configuration. Structured generation requests
+`application/json` with the requested Pydantic schema, then validates the
+returned value again at the application boundary. Raw SDK responses and SDK
+exceptions never leave the adapter.
 
-- OpenAI
-- Anthropic
-- Local models
+`create_llm_provider` is the composition boundary for Gemini and the
+deterministic fake. It returns a new instance rather than maintaining global
+mutable state, so API and frontend layers can inject provider lifetimes later.
+Future providers can be added as isolated adapters plus an explicit factory
+branch without changing business modules.
+
+The SDK is configured with the environment timeout and exactly one retry layer.
+The total attempts equal the original request plus `LLM_MAX_RETRIES`. Only 408,
+429, selected 5xx responses, timeouts, and connection failures are transient;
+the SDK applies exponential backoff with jitter. Provider-neutral exceptions
+distinguish configuration, authentication, timeout, rate-limit, transient,
+validation, and permanent provider failures.
 
 ### Scoring Layer
 

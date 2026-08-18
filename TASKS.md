@@ -40,14 +40,14 @@ Complete tasks in order. Do not skip ahead unless a dependency requires it.
 
 ## Phase 3 — LLM Provider
 
-- [ ] Define provider interface
-- [ ] Implement Gemini provider
-- [ ] Read API key from environment
-- [ ] Add timeout handling
-- [ ] Add retry policy
-- [ ] Add structured-output validation
-- [ ] Add fake provider for tests
-- [ ] Add provider tests
+- [x] Define provider interface
+- [x] Implement Gemini provider
+- [x] Read API key from environment
+- [x] Add timeout handling
+- [x] Add retry policy
+- [x] Add structured-output validation
+- [x] Add fake provider for tests
+- [x] Add provider tests
 
 ## Phase 4 — Opportunity Parser
 

@@ -2,11 +2,43 @@
 
 import os
 
+from pydantic import BaseModel, ConfigDict, Field, SecretStr
 from sqlalchemy.engine import URL, make_url
 
 
 class DatabaseConfigurationError(ValueError):
     """Raised when a required PostgreSQL URL is absent or unsafe."""
+
+
+class LLMSettings(BaseModel):
+    """Validated provider-neutral LLM settings read from the environment."""
+
+    model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
+
+    provider: str = "gemini"
+    gemini_api_key: SecretStr | None = None
+    gemini_model: str = ""
+    timeout_seconds: float = Field(default=30.0, gt=0)
+    max_retries: int = Field(default=3, ge=0, le=10)
+    max_output_tokens: int = Field(default=2048, gt=0)
+    temperature: float = Field(default=0.2, ge=0, le=2)
+
+    @classmethod
+    def from_env(cls) -> "LLMSettings":
+        """Build settings from environment variables without reading secret files."""
+
+        api_key = os.getenv("GEMINI_API_KEY")
+        return cls.model_validate(
+            {
+                "provider": os.getenv("LLM_PROVIDER", "gemini"),
+                "gemini_api_key": api_key or None,
+                "gemini_model": os.getenv("GEMINI_MODEL", ""),
+                "timeout_seconds": os.getenv("LLM_TIMEOUT_SECONDS", "30"),
+                "max_retries": os.getenv("LLM_MAX_RETRIES", "3"),
+                "max_output_tokens": os.getenv("LLM_MAX_OUTPUT_TOKENS", "2048"),
+                "temperature": os.getenv("LLM_TEMPERATURE", "0.2"),
+            }
+        )
 
 
 def get_database_url() -> str:
