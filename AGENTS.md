@@ -63,6 +63,18 @@ tests/
 - Use PostgreSQL for the MVP, FastAPI for the backend, and Streamlit for the review frontend.
 - Start with Gemini behind a replaceable LLM-provider interface.
 
+### LLM provider boundary
+
+- Business modules depend on `core.llm.LLMProvider`; they never import a
+  provider SDK directly.
+- Gemini-specific construction, configuration, response objects, and error
+  handling stay in `core/llm/gemini.py`.
+- Use the official `google-genai` package. Do not add the legacy
+  `google-generativeai` package.
+- Construct providers through dependency injection or `create_llm_provider`;
+  do not add a mutable global provider instance.
+- Use `FakeLLMProvider` for standard tests. Real provider calls must be opt-in.
+
 ### LLM responsibilities
 
 The LLM may:

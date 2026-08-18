@@ -97,3 +97,67 @@ Human approval controls outbound actions.
 - `frontend` composes the application and does not contain scoring or LLM business rules.
 
 Gemini is the first LLM provider behind a replaceable provider interface. PostgreSQL is the MVP datastore, FastAPI provides the backend, and Streamlit provides the minimal review frontend.
+
+## LLM Provider Configuration
+
+`core/llm` keeps application code independent of any provider SDK. Business
+modules depend only on `LLMProvider`, which supports asynchronous plain-text
+generation and structured Pydantic output. They must never import
+`google.genai` directly. This boundary keeps provider errors, response objects,
+timeouts, and authentication details out of business logic and makes offline
+tests deterministic.
+
+The Gemini adapter uses the current `google-genai` package, not the legacy
+`google-generativeai` package. Copy `.env.example` to `.env` and configure:
+
+```dotenv
+LLM_PROVIDER=gemini
+GEMINI_API_KEY=your-key
+GEMINI_MODEL=an-available-gemini-flash-model
+LLM_TIMEOUT_SECONDS=30
+LLM_MAX_RETRIES=3
+LLM_MAX_OUTPUT_TOKENS=2048
+LLM_TEMPERATURE=0.2
+```
+
+`GEMINI_MODEL` is intentionally required rather than spread as a constant
+throughout the codebase. Model names, availability, and free-tier quotas can
+change. Select a currently available Flash model from the
+[official Gemini models documentation](https://ai.google.dev/gemini-api/docs/models)
+and set its exact model ID in the environment. Constructing a real provider
+without both the API key and model raises `LLMConfigurationError`.
+
+`create_llm_provider(LLMSettings.from_env())` creates a fresh provider suitable
+for later FastAPI dependency injection. Set `LLM_PROVIDER=fake` in test-specific
+settings when a factory-created offline provider is needed; unit tests can also
+instantiate `FakeLLMProvider` with predefined responses and failures directly.
+
+## LLM Tests
+
+The standard suite mocks the Google SDK and never needs an API key:
+
+```bash
+pytest
+ruff check .
+mypy
+```
+
+An optional minimal live request is excluded by default. To run it explicitly,
+export a valid key and a model currently available to that key:
+
+```bash
+export GEMINI_API_KEY=your-key
+export GEMINI_MODEL=an-available-gemini-flash-model
+pytest -m live_llm
+```
+
+The SDK receives the request timeout in milliseconds. Its single configured
+retry layer makes the initial request plus at most `LLM_MAX_RETRIES` retries for
+HTTP 408, 429, 500, 502, 503, and 504 responses and for supported timeout or
+connection failures. Backoff starts at one second, doubles to an eight-second
+cap, and includes small jitter. Authentication failures, permanent 4xx errors,
+content-policy failures, and Pydantic validation failures are not retried.
+
+To add another provider, implement `LLMProvider` in an isolated adapter, map its
+SDK failures to `core.llm.exceptions`, add one explicit factory branch, and add
+mocked contract tests. No business-module import needs to change.
